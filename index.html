@@ -100,7 +100,7 @@
     <div id="splash-screen">
         <img src="https://i.postimg.cc/QMG87z3M/Novus-Solutions-HR-Services.gif" alt="Loading Application..." class="w-72 h-auto object-contain">
         <p class="text-sm text-slate-600 mt-4 tracking-widest font-bold uppercase">Novus Solutions & HR Services</p>
-        <p class="text-xs text-slate-400 mt-1 font-medium">Enterprise Management Suite • Version 1.082</p>
+        <p class="text-xs text-slate-400 mt-1 font-medium">Enterprise Management Suite • Version 1.083</p>
     </div>
 
     <div id="app-content" class="opacity-0 transition-opacity duration-500 max-w-7xl mx-auto p-4 md:p-6">
@@ -110,7 +110,7 @@
                 <img src="https://i.postimg.cc/BbQQ61GD/novuslogo.png" alt="Company Icon" class="h-10 w-10 object-contain bg-white rounded-lg p-1">
                 <div>
                     <h1 class="text-md md:text-lg font-black tracking-tight text-white">Novus Solutions & HR Services</h1>
-                    <p class="text-[11px] text-slate-400 font-bold tracking-wide uppercase">Core HR Payroll Engine v1.082</p>
+                    <p class="text-[11px] text-slate-400 font-bold tracking-wide uppercase">Core HR Payroll Engine v1.083</p>
                 </div>
             </div>
             
@@ -200,6 +200,10 @@
                             <input type="text" id="inBankAcc" value="" oninput="calculateSalary()" class="w-full text-xs p-2 border border-slate-200 rounded-md focus:ring-1 focus:ring-blue-500 outline-none font-medium">
                         </div>
                     </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Joining Date</label>
+                        <input type="date" id="inJoiningDate" value="" oninput="calculateSalary()" class="w-full text-xs p-2 border border-slate-200 rounded-md focus:ring-1 focus:ring-blue-500 outline-none font-medium">
+                    </div>
                 </div>
 
                 <div class="bg-blue-50/50 p-3 rounded-lg border border-blue-200 space-y-3">
@@ -259,7 +263,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-3 sm:grid-cols-5 gap-2 my-4 text-[10px] bg-slate-50 border-y border-slate-200 py-2.5 px-3">
+                    <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 my-4 text-[10px] bg-slate-50 border-y border-slate-200 py-2.5 px-3">
                         <div>
                             <span class="text-slate-400 block font-bold uppercase tracking-wider text-[8px]">Employee Code</span>
                             <span id="slipEmpId" class="font-bold text-slate-800 text-[11px]"></span>
@@ -267,6 +271,10 @@
                         <div>
                             <span class="text-slate-400 block font-bold uppercase tracking-wider text-[8px]">Department</span>
                             <span id="slipDepartment" class="font-semibold text-slate-800"></span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block font-bold uppercase tracking-wider text-[8px]">Joining Date</span>
+                            <span id="slipJoiningDate" class="font-semibold text-slate-800 text-[11px]">N/A</span>
                         </div>
                         <div>
                             <span class="text-slate-400 block font-bold uppercase tracking-wider text-[8px]">W.Off Paid</span>
@@ -277,7 +285,7 @@
                             <span id="slipLwpAbsDisplay" class="font-bold text-slate-800 text-[11px]">0</span>
                         </div>
                         <div>
-                            <span class="text-slate-400 block font-bold uppercase tracking-wider text-[8px]">Calculated Paid Days</span>
+                            <span class="text-slate-400 block font-bold uppercase tracking-wider text-[8px]">Days Paid</span>
                             <span id="slipPaidDays" class="font-black text-blue-800 text-[11px]"></span>
                         </div>
                     </div>
@@ -379,7 +387,7 @@
                         </div>
                     </div>
                     
-                    <p class="text-center text-[9px] text-slate-400 mt-10 tracking-normal border-t border-slate-100 pt-2">This file is system processed and authenticated electronically, hence manually signed seal structures are optionally verifiable via ledger architecture.</p>
+                    <p class="text-center text-[9px] text-slate-400 mt-10 tracking-normal border-t border-slate-100 pt-2">This is system-generated payslip; no signature or stamp is required.</p>
                 </div>
             </div>
         </div>
@@ -407,7 +415,7 @@
 
             <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                 <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider mb-3">Add / Update Standalone Profile Entity</h3>
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 text-xs">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 text-xs">
                     <div>
                         <label class="block font-bold text-slate-600 mb-1">Emp Full Name*</label>
                         <input type="text" id="dbName" placeholder="John Doe" class="w-full p-2 border border-slate-300 rounded-md bg-white">
@@ -432,20 +440,24 @@
                         <label class="block font-bold text-slate-600 mb-1">Account No.</label>
                         <input type="text" id="dbBankAcc" placeholder="55501234" class="w-full p-2 border border-slate-300 rounded-md bg-white">
                     </div>
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1">Joining Date</label>
+                        <input type="date" id="dbJoiningDate" class="w-full p-2 border border-slate-300 rounded-md bg-white">
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs mt-3 border-t border-slate-200 pt-3">
                     <div>
                         <label class="block font-bold text-emerald-800 mb-1">Base Net Salary (₹)*</label>
-                        <input type="number" id="dbNetSalary" value="0" class="w-full p-2 border border-slate-300 rounded-md bg-white font-semibold">
+                        <input type="number" id="dbNetSalary" value="" class="w-full p-2 border border-slate-300 rounded-md bg-white font-semibold">
                     </div>
                     <div>
                         <label class="block font-bold text-rose-800 mb-1">Provident Fund PF (₹)</label>
-                        <input type="number" id="dbPf" value="0" class="w-full p-2 border border-slate-300 rounded-md bg-white">
+                        <input type="number" id="dbPf" value="" class="w-full p-2 border border-slate-300 rounded-md bg-white">
                     </div>
                     <div>
                         <label class="block font-bold text-rose-800 mb-1">Professional Tax PT (₹)</label>
-                        <input type="number" id="dbPt" value="0" class="w-full p-2 border border-slate-300 rounded-md bg-white">
+                        <input type="number" id="dbPt" value="" class="w-full p-2 border border-slate-300 rounded-md bg-white">
                     </div>
                 </div>
 
@@ -678,6 +690,7 @@
             document.getElementById('inNetSalary').value = employeeObject.netSalary || 0;
             document.getElementById('inPf').value = employeeObject.pf || 0;
             document.getElementById('inPt').value = employeeObject.pt || 0;
+            document.getElementById('inJoiningDate').value = employeeObject.joiningDate || '';
 
             document.getElementById('searchDropdown').classList.add('hidden');
             calculateSalary();
@@ -739,9 +752,17 @@
             document.getElementById('slipEmpId').innerText = document.getElementById('inEmpId').value;
             document.getElementById('slipDesignation').innerText = document.getElementById('inDesignation').value;
             document.getElementById('slipDepartment').innerText = document.getElementById('inDepartment').value;
-            document.getElementById('slipBankName').innerText = document.getElementById('inBankName').value || 'N/A';
-            document.getElementById('slipBankAcc').innerText = document.getElementById('inBankAcc').value || 'N/A';
+            document.getElementById('slipBankName').innerText = document.getElementById('inBankName').value || '';
+            document.getElementById('slipBankAcc').innerText = document.getElementById('inBankAcc').value || '';
             
+            const rawJoinDate = document.getElementById('inJoiningDate').value;
+            if(rawJoinDate) {
+                const jdParts = rawJoinDate.split('-');
+                document.getElementById('slipJoiningDate').innerText = `${jdParts[2]}/${jdParts[1]}/${jdParts[0]}`;
+            } else {
+                document.getElementById('slipJoiningDate').innerText = '';
+            }
+
             document.getElementById('slipWoffPaidDisplay').innerText = document.getElementById('inWoffPaid').value || '0';
             document.getElementById('slipLwpAbsDisplay').innerText = document.getElementById('inLwpAbs').value || '0';
             document.getElementById('slipPaidDays').innerText = computedPaidDays;
@@ -784,11 +805,27 @@
                         <td class="p-3 text-right font-bold text-rose-700">${formatIndianCurrency(deductions)}</td>
                         <td class="p-3 text-center space-x-1">
                             <button onclick='loadToWorkspace(${JSON.stringify(emp).replace(/"/g, '&quot;')})' class="bg-blue-50 text-blue-700 hover:bg-blue-100 text-[10px] font-black px-2 py-1 rounded-md transition cursor-pointer uppercase">Load</button>
+                            <button onclick='editFromDatabaseForm(${JSON.stringify(emp).replace(/"/g, '&quot;')})' class="bg-amber-50 text-amber-700 hover:bg-amber-100 text-[10px] font-black px-2 py-1 rounded-md transition cursor-pointer uppercase">Edit</button>
                             <button onclick="deleteEmployeeRecord(${index})" class="bg-rose-50 text-rose-700 hover:bg-rose-100 text-[10px] font-black px-2 py-1 rounded-md transition cursor-pointer uppercase">Delete</button>
                         </td>
                     </tr>
                 `;
             }).join('');
+        }
+
+        function editFromDatabaseForm(employeeObject) {
+            document.getElementById('dbName').value = employeeObject.name;
+            document.getElementById('dbId').value = employeeObject.id;
+            document.getElementById('dbDesignation').value = employeeObject.designation;
+            document.getElementById('dbDepartment').value = employeeObject.department;
+            document.getElementById('dbBankName').value = employeeObject.bankName || '';
+            document.getElementById('dbBankAcc').value = employeeObject.bankAcc || '';
+            document.getElementById('dbNetSalary').value = employeeObject.netSalary || 0;
+            document.getElementById('dbPf').value = employeeObject.pf || 0;
+            document.getElementById('dbPt').value = employeeObject.pt || 0;
+            document.getElementById('dbJoiningDate').value = employeeObject.joiningDate || '';
+            
+            document.getElementById('dbName').focus();
         }
 
         function addOrUpdateEmployee() {
@@ -812,7 +849,8 @@
                 bankAcc: document.getElementById('dbBankAcc').value.trim(),
                 netSalary: netSalary,
                 pf: parseFloat(document.getElementById('dbPf').value) || 0,
-                pt: parseFloat(document.getElementById('dbPt').value) || 0
+                pt: parseFloat(document.getElementById('dbPt').value) || 0,
+                joiningDate: document.getElementById('dbJoiningDate').value
             };
 
             const targetIndex = employeeDatabase.findIndex(emp => emp.id.toLowerCase() === id.toLowerCase());
@@ -825,7 +863,7 @@
             saveDatabaseState();
             renderEmployeeTable();
             
-            ['dbName', 'dbId', 'dbDesignation', 'dbDepartment', 'dbBankName', 'dbBankAcc'].forEach(id => document.getElementById(id).value = "");
+            ['dbName', 'dbId', 'dbDesignation', 'dbDepartment', 'dbBankName', 'dbBankAcc', 'dbJoiningDate'].forEach(id => document.getElementById(id).value = "");
             ['dbNetSalary', 'dbPf', 'dbPt'].forEach(id => document.getElementById(id).value = "0");
             
             alert(`Employee Record associated with ID "${id}" saved successfully!`);
@@ -893,7 +931,8 @@
                     bankAcc: String(row.bankAcc || row.BankAccount || row.AccountNo || '').trim(),
                     netSalary: parseFloat(row.netSalary || row.NetSalary || row.NetPay || 0),
                     pf: parseFloat(row.pf || row.Pf || row.PF || 0),
-                    pt: parseFloat(row.pt || row.Pt || row.PT || 0)
+                    pt: parseFloat(row.pt || row.Pt || row.PT || 0),
+                    joiningDate: String(row.joiningDate || row.JoiningDate || '').trim()
                 })).filter(item => item.name && item.id);
 
                 if(structuredImports.length === 0) {
