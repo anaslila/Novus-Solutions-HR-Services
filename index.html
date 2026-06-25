@@ -531,9 +531,27 @@
             });
 
             window.onbeforeprint = () => {
-                const now = new Date();
-                document.getElementById('print-date-time-stamp').innerText = "Printed On: " + now.toLocaleString();
-            };
+    const now = new Date();
+    document.getElementById('print-date-time-stamp').innerText = "Printed On: " + now.toLocaleString();
+
+    // 1. Get values from the input fields
+    const empCode = document.getElementById('inEmpId').value || 'UNKNOWN';
+    const rawMonth = document.getElementById('inSalaryMonth').value || 'MONTH'; // format: YYYY-MM
+    
+    // 2. Format the month string (e.g., 2026-06 becomes 062026 or June2026)
+    const monthYear = rawMonth.replace('-', ''); 
+
+    // 3. Construct the clean file name (Removing any spaces)
+    const customTitle = `ESPERON_${empCode}_${monthYear}`.replace(/\s+/g, '');
+
+    // 4. Update the document title temporarily for the print dialog
+    document.title = customTitle;
+};
+
+// Reset the title back to normal after the print window closes
+window.onafterprint = () => {
+    document.title = "Novus Solutions & HR Services";
+};
         });
 
         function switchTab(targetTab) {
