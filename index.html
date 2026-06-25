@@ -29,7 +29,27 @@
             transition: opacity 0.4s ease-out, visibility 0.4s;
         }
         
+        .custom-scroll::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        #print-footer-metadata {
+            display: none;
+        }
+
         @media print {
+            @page {
+                size: A4;
+                margin: 15mm 15mm 20mm 15mm;
+            }
             body {
                 background: #ffffff !important;
                 color: #000000 !important;
@@ -50,24 +70,28 @@
                 border: none !important;
             }
             #printable-slip {
-                border: 1px solid #1e293b !important;
+                border: 1px solid #000000 !important;
                 box-shadow: none !important;
-                padding: 20px !important;
+                padding: 10px !important;
                 width: 100% !important;
-                max-width: 100% !important;
             }
-        }
-
-        .custom-scroll::-webkit-scrollbar {
-            width: 5px;
-            height: 5px;
-        }
-        .custom-scroll::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
+            #print-footer-metadata {
+                display: block;
+                position: fixed;
+                bottom: -5mm;
+                left: 0;
+                right: 0;
+                font-family: monospace;
+                font-size: 10px;
+                color: #64748b;
+                border-top: 1px solid #e2e8f0;
+                padding-top: 4px;
+            }
+            .print-flex-row {
+                display: flex;
+                justify-content: space-between;
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -76,7 +100,7 @@
     <div id="splash-screen">
         <img src="https://i.postimg.cc/QMG87z3M/Novus-Solutions-HR-Services.gif" alt="Loading Application..." class="w-72 h-auto object-contain">
         <p class="text-sm text-slate-600 mt-4 tracking-widest font-bold uppercase">Novus Solutions & HR Services</p>
-        <p class="text-xs text-slate-400 mt-1 font-medium">Enterprise Management Suite • Version 1.08</p>
+        <p class="text-xs text-slate-400 mt-1 font-medium">Enterprise Management Suite • Version 1.082</p>
     </div>
 
     <div id="app-content" class="opacity-0 transition-opacity duration-500 max-w-7xl mx-auto p-4 md:p-6">
@@ -86,7 +110,7 @@
                 <img src="https://i.postimg.cc/BbQQ61GD/novuslogo.png" alt="Company Icon" class="h-10 w-10 object-contain bg-white rounded-lg p-1">
                 <div>
                     <h1 class="text-md md:text-lg font-black tracking-tight text-white">Novus Solutions & HR Services</h1>
-                    <p class="text-[11px] text-slate-400 font-bold tracking-wide uppercase">Core HR Architecture & Payroll Engine v1.08</p>
+                    <p class="text-[11px] text-slate-400 font-bold tracking-wide uppercase">Core HR Architecture & Payroll Engine v1.082</p>
                 </div>
             </div>
             
@@ -116,6 +140,16 @@
                 <div class="bg-slate-50/50 p-3 rounded-lg border border-slate-200 space-y-3">
                     <h3 class="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1">🏢 Organization Branding</h3>
                     <div>
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Upload Corporate Logo / Photo</label>
+                        <div class="flex items-center gap-2">
+                            <label class="w-full flex flex-col items-center px-3 py-2 bg-white text-blue-600 rounded-md border border-slate-300 border-dashed tracking-wide uppercase text-[10px] font-bold cursor-pointer hover:bg-blue-50 transition">
+                                <span class="truncate" id="upload-status-text">📁 Browse Local Files / Camera</span>
+                                <input type='file' id="inCompanyLogoFile" accept="image/*" class="hidden" onchange="processLogoUpload(this)" />
+                            </label>
+                            <button onclick="resetDefaultLogo()" class="text-[10px] bg-slate-200 text-slate-700 px-2 py-2 rounded-md font-bold hover:bg-slate-300 transition cursor-pointer">Reset</button>
+                        </div>
+                    </div>
+                    <div>
                         <label class="block text-[11px] font-bold text-slate-600 mb-1">Company Name</label>
                         <input type="text" id="inCompanyName" value="Novus Solutions & HR Services" oninput="calculateSalary()" class="w-full text-xs p-2 border border-slate-200 rounded-md focus:ring-1 focus:ring-blue-500 outline-none font-medium">
                     </div>
@@ -132,24 +166,24 @@
                     
                     <div class="relative">
                         <label class="block text-[11px] font-bold text-slate-600 mb-1">Search & Select Employee Name</label>
-                        <input type="text" id="inEmpName" value="" oninput="handleSearchDropdown(this.value)" autocomplete="off" placeholder="Start typing name..." class="w-full text-xs p-2 border border-slate-300 rounded-md bg-white focus:ring-1 focus:ring-blue-500 outline-none font-bold">
+                        <input type="text" id="inEmpName" value="Rahul Sharma" oninput="handleSearchDropdown(this.value)" autocomplete="off" placeholder="Start typing name..." class="w-full text-xs p-2 border border-slate-300 rounded-md bg-white focus:ring-1 focus:ring-blue-500 outline-none font-bold">
                         <div id="searchDropdown" class="absolute left-0 right-0 mt-1 bg-white border border-slate-300 rounded-md shadow-xl hidden max-h-48 overflow-y-auto z-50 custom-scroll divide-y divide-slate-100"></div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="block text-[11px] font-bold text-slate-600 mb-1">Employee Unique ID</label>
-                            <input type="text" id="inEmpId" value="" oninput="calculateSalary()" class="w-full text-xs p-2 border border-slate-200 rounded-md focus:ring-1 focus:ring-blue-500 outline-none font-medium">
+                            <input type="text" id="inEmpId" value="NS-2026-089" oninput="calculateSalary()" class="w-full text-xs p-2 border border-slate-200 rounded-md focus:ring-1 focus:ring-blue-500 outline-none font-medium">
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-slate-600 mb-1">Designation Title</label>
-                            <input type="text" id="inDesignation" value="" oninput="calculateSalary()" class="w-full text-xs p-2 border border-slate-200 rounded-md focus:ring-1 focus:ring-blue-500 outline-none font-medium">
+                            <input type="text" id="inDesignation" value="Senior HR Consultant" oninput="calculateSalary()" class="w-full text-xs p-2 border border-slate-200 rounded-md focus:ring-1 focus:ring-blue-500 outline-none font-medium">
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="block text-[11px] font-bold text-slate-600 mb-1">Department Unit</label>
-                            <input type="text" id="inDepartment" value="" oninput="calculateSalary()" class="w-full text-xs p-2 border border-slate-200 rounded-md focus:ring-1 focus:ring-blue-500 outline-none font-medium">
+                            <input type="text" id="inDepartment" value="Human Resources" oninput="calculateSalary()" class="w-full text-xs p-2 border border-slate-200 rounded-md focus:ring-1 focus:ring-blue-500 outline-none font-medium">
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-slate-600 mb-1">Target Statement Month</label>
@@ -159,46 +193,52 @@
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="block text-[11px] font-bold text-slate-600 mb-1">Bank Name</label>
-                            <input type="text" id="inBankName" value="" oninput="calculateSalary()" class="w-full text-xs p-2 border border-slate-200 rounded-md focus:ring-1 focus:ring-blue-500 outline-none font-medium">
+                            <input type="text" id="inBankName" value="HDFC Bank" oninput="calculateSalary()" class="w-full text-xs p-2 border border-slate-200 rounded-md focus:ring-1 focus:ring-blue-500 outline-none font-medium">
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-slate-600 mb-1">Bank Account Identifier</label>
-                            <input type="text" id="inBankAcc" value="" oninput="calculateSalary()" class="w-full text-xs p-2 border border-slate-200 rounded-md focus:ring-1 focus:ring-blue-500 outline-none font-medium">
+                            <input type="text" id="inBankAcc" value="XXXXXX12345" oninput="calculateSalary()" class="w-full text-xs p-2 border border-slate-200 rounded-md focus:ring-1 focus:ring-blue-500 outline-none font-medium">
                         </div>
                     </div>
-                    
-                    <div class="grid grid-cols-2 gap-2 border-t border-slate-200 pt-2 mt-2">
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Max Days in Month</label>
-                            <input type="number" id="inMaxDays" value="30" disabled class="w-full text-xs p-2 border border-slate-200 bg-slate-100 rounded-md outline-none font-medium text-slate-500">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-blue-700 mb-1">Paid Days</label>
-                            <input type="number" id="inPaidDays" value="26" oninput="calculateSalary()" class="w-full text-xs p-2 border border-blue-200 rounded-md focus:ring-1 focus:ring-blue-500 outline-none font-medium">
-                        </div>
-                    </div>
-                    
+                </div>
+
+                <div class="bg-blue-50/50 p-3 rounded-lg border border-blue-200 space-y-3">
+                    <h3 class="text-[11px] font-bold uppercase tracking-wider text-blue-700">📆 Attendance Framework Structure</h3>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="block text-[11px] font-bold text-emerald-700 mb-1">W.Off Paid (Days)</label>
-                            <input type="number" id="inWOffPaid" value="4" oninput="calculateSalary()" class="w-full text-xs p-2 border border-emerald-200 rounded-md focus:ring-1 focus:ring-emerald-500 outline-none font-medium">
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">W.Off Paid (Days)</label>
+                            <input type="number" id="inWoffPaid" placeholder="Empty" oninput="calculateSalary()" class="w-full text-xs p-2 border border-slate-200 rounded-md focus:ring-1 focus:ring-blue-500 outline-none">
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-rose-700 mb-1">LWP / Abs (Days)</label>
-                            <input type="number" id="inLwpAbs" value="0" oninput="calculateSalary()" class="w-full text-xs p-2 border border-rose-200 rounded-md focus:ring-1 focus:ring-rose-500 outline-none font-medium">
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">LWP/Abs (Days)</label>
+                            <input type="number" id="inLwpAbs" placeholder="Empty" oninput="calculateSalary()" class="w-full text-xs p-2 border border-slate-200 rounded-md focus:ring-1 focus:ring-blue-500 outline-none">
                         </div>
                     </div>
                 </div>
 
                 <div class="bg-emerald-50/30 p-3 rounded-lg border border-emerald-100 space-y-3">
-                    <h3 class="text-[11px] font-bold uppercase tracking-wider text-emerald-700">💰 Net Salary Target Mapping</h3>
+                    <h3 class="text-[11px] font-bold uppercase tracking-wider text-emerald-700">💰 Net Salary Architecture Base</h3>
                     <div>
-                        <label class="block text-[11px] font-black text-slate-700 mb-1">Target Base Net Salary (₹)</label>
-                        <input type="number" id="inTotalNet" value="0" oninput="calculateSalary()" class="w-full text-xs p-2 border border-slate-300 bg-white font-bold rounded-md focus:ring-1 focus:ring-blue-500 outline-none">
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Target Base Net Salary (In-Hand Base) (₹)</label>
+                        <input type="number" id="inNetSalary" value="75000" oninput="calculateSalary()" class="w-full text-xs p-2 border border-emerald-300 rounded-md focus:ring-1 focus:ring-blue-500 outline-none font-bold">
                     </div>
-                    <div class="border-t border-emerald-100 pt-2">
+                    <div>
                         <label class="block text-[11px] font-black text-emerald-800 mb-1">Earned Commission / Variable Incentives (₹)</label>
-                        <input type="number" id="inCommission" value="" placeholder="Empty/None" oninput="calculateSalary()" class="w-full text-xs p-2 border border-emerald-200 rounded-md bg-emerald-50/50 focus:ring-1 focus:ring-emerald-600 font-bold text-slate-900 outline-none">
+                        <input type="number" id="inCommission" placeholder="Empty" oninput="calculateSalary()" class="w-full text-xs p-2 border border-emerald-200 rounded-md bg-emerald-50/50 focus:ring-1 focus:ring-emerald-600 font-bold text-slate-900 outline-none">
+                    </div>
+                </div>
+
+                <div class="bg-rose-50/30 p-3 rounded-lg border border-rose-100 space-y-3">
+                    <h3 class="text-[11px] font-bold uppercase tracking-wider text-rose-700">📉 Over-and-Above Deductions (₹)</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Provident Fund (PF)</label>
+                            <input type="number" id="inPf" value="1800" oninput="calculateSalary()" class="w-full text-xs p-2 border border-slate-200 rounded-md focus:ring-1 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Professional Tax (PT)</label>
+                            <input type="number" id="inPt" value="200" oninput="calculateSalary()" class="w-full text-xs p-2 border border-slate-200 rounded-md focus:ring-1 focus:ring-blue-500 outline-none">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -208,64 +248,67 @@
                     
                     <div class="flex items-start justify-between border-b border-slate-900 pb-4">
                         <div class="flex items-center gap-4">
-                            <img id="slipLogo" src="https://i.postimg.cc/BbQQ61GD/novuslogo.png" alt="Company Branding Shield" class="h-14 w-14 object-contain border border-slate-200 p-1 bg-white rounded-sm">
+                            <img id="slipLogo" src="https://i.postimg.cc/BbQQ61GD/novuslogo.png" alt="Company Branding Shield" class="h-16 w-16 object-contain border border-slate-200 p-1 bg-white rounded-sm">
                             <div>
-                                <h2 id="slipCompanyName" class="text-lg font-black text-slate-900 tracking-tight leading-tight">Novus Solutions & HR Services</h2>
-                                <p id="slipCompanyAddress" class="text-[10px] text-slate-500 max-w-sm font-medium mt-0.5 leading-relaxed">Mumbai</p>
+                                <h2 id="slipCompanyName" class="text-lg font-black text-slate-900 tracking-tight leading-tight"></h2>
+                                <p id="slipCompanyAddress" class="text-[10px] text-slate-500 max-w-sm font-medium mt-0.5 leading-relaxed"></p>
                             </div>
                         </div>
                         <div class="text-right">
-                            <span id="slipMonth" class="font-black text-slate-900 text-sm block">June 2026</span>
+                            <h3 id="slipHeaderMonthYear" class="text-base font-black text-slate-900 tracking-wider uppercase"></h3>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 my-4 text-[10px] bg-slate-50 border-y border-slate-200 py-2.5 px-3">
+                    <div class="grid grid-cols-3 sm:grid-cols-5 gap-2 my-4 text-[10px] bg-slate-50 border-y border-slate-200 py-2.5 px-3">
                         <div>
-                            <span class="text-slate-400 block font-bold uppercase tracking-wider text-[8px]">Employee ID</span>
-                            <span id="slipEmpId" class="font-bold text-slate-800 text-[11px]">-</span>
+                            <span class="text-slate-400 block font-bold uppercase tracking-wider text-[8px]">Employee Code</span>
+                            <span id="slipEmpId" class="font-bold text-slate-800 text-[11px]"></span>
                         </div>
                         <div>
-                            <span class="text-slate-400 block font-bold uppercase tracking-wider text-[8px]">Department / Node</span>
-                            <span id="slipDepartment" class="font-semibold text-slate-800">-</span>
-                        </div>
-                        <div>
-                            <span class="text-slate-400 block font-bold uppercase tracking-wider text-[8px]">Paid Days</span>
-                            <span id="slipPaidDays" class="font-bold text-slate-800 text-[11px]">0</span>
+                            <span class="text-slate-400 block font-bold uppercase tracking-wider text-[8px]">Department</span>
+                            <span id="slipDepartment" class="font-semibold text-slate-800"></span>
                         </div>
                         <div>
                             <span class="text-slate-400 block font-bold uppercase tracking-wider text-[8px]">W.Off Paid</span>
-                            <span id="slipWOffPaid" class="font-bold text-emerald-700 text-[11px]">0</span>
+                            <span id="slipWoffPaidDisplay" class="font-bold text-slate-800 text-[11px]">0</span>
                         </div>
                         <div>
                             <span class="text-slate-400 block font-bold uppercase tracking-wider text-[8px]">LWP/Abs</span>
-                            <span id="slipLwpAbs" class="font-bold text-rose-700 text-[11px]">0</span>
+                            <span id="slipLwpAbsDisplay" class="font-bold text-slate-800 text-[11px]">0</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block font-bold uppercase tracking-wider text-[8px]">Calculated Paid Days</span>
+                            <span id="slipPaidDays" class="font-black text-blue-800 text-[11px]"></span>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1.5 my-4 text-[11px] px-2">
                         <div class="flex justify-between border-b border-slate-100 pb-1">
                             <span class="text-slate-500 font-medium">Employee Name:</span> 
-                            <span id="slipEmpName" class="font-black text-slate-900 tracking-tight">-</span>
+                            <span id="slipEmpName" class="font-black text-slate-900 tracking-tight"></span>
                         </div>
                         <div class="flex justify-between border-b border-slate-100 pb-1">
                             <span class="text-slate-500 font-medium">Bank Name:</span> 
-                            <span id="slipBankName" class="font-bold text-slate-800">-</span>
+                            <span id="slipBankName" class="font-bold text-slate-800"></span>
                         </div>
                         <div class="flex justify-between border-b border-slate-100 pb-1 sm:border-none">
                             <span class="text-slate-500 font-medium">Designation / Role:</span> 
-                            <span id="slipDesignation" class="font-semibold text-slate-800">-</span>
+                            <span id="slipDesignation" class="font-semibold text-slate-800"></span>
                         </div>
                         <div class="flex justify-between border-b border-slate-100 pb-1 sm:border-none">
                             <span class="text-slate-500 font-medium">Bank Account Number:</span> 
-                            <span id="slipBankAcc" class="font-mono text-slate-800 font-bold">-</span>
+                            <span id="slipBankAcc" class="font-mono text-slate-800 font-bold"></span>
                         </div>
                     </div>
 
                     <div class="border border-slate-400 text-[11px] my-5 bg-white">
                         <div class="grid grid-cols-2 bg-slate-900 text-white font-black py-2 px-3 tracking-wider uppercase text-[10px]">
-                            <div class="tracking-wide">Compensation Matrix (Earnings)</div>
                             <div class="grid grid-cols-2">
-                                <div class="pl-4 tracking-wide">Statutory Deductions</div>
+                                <div class="tracking-wide">Earnings</div>
+                                <div class="text-right pr-4 tracking-wide">Amount Value</div>
+                            </div>
+                            <div class="grid grid-cols-2">
+                                <div class="pl-4 tracking-wide">Deductions</div>
                                 <div class="text-right tracking-wide">Amount Value</div>
                             </div>
                         </div>
@@ -273,72 +316,70 @@
                         <div class="divide-y divide-slate-200">
                             <div class="grid grid-cols-2 py-2 px-3">
                                 <div class="grid grid-cols-2">
-                                    <span class="text-slate-600 font-medium">Basic Salary</span>
-                                    <span class="text-right pr-4 font-bold text-slate-900" id="slipBasic">₹0.00</span>
+                                    <span class="text-slate-600 font-medium">Basic Salary Base</span>
+                                    <span class="text-right pr-4 font-bold text-slate-900" id="slipBasic"></span>
                                 </div>
                                 <div class="grid grid-cols-2 border-l border-slate-200">
                                     <span class="text-slate-600 pl-4 font-medium">Provident Fund (PF)</span>
-                                    <span class="text-right font-bold text-slate-900" id="slipPf">₹0.00</span>
+                                    <span class="text-right font-bold text-slate-900" id="slipPf"></span>
                                 </div>
                             </div>
                             <div class="grid grid-cols-2 py-2 px-3 bg-slate-50/50">
                                 <div class="grid grid-cols-2">
                                     <span class="text-slate-600 font-medium">House Rent Allowance (HRA)</span>
-                                    <span class="text-right pr-4 font-bold text-slate-900" id="slipHra">₹0.00</span>
+                                    <span class="text-right pr-4 font-bold text-slate-900" id="slipHra"></span>
                                 </div>
                                 <div class="grid grid-cols-2 border-l border-slate-200">
                                     <span class="text-slate-600 pl-4 font-medium">Professional Tax (PT)</span>
-                                    <span class="text-right font-bold text-slate-900" id="slipPt">₹0.00</span>
+                                    <span class="text-right font-bold text-slate-900" id="slipPt"></span>
                                 </div>
                             </div>
                             <div class="grid grid-cols-2 py-2 px-3">
                                 <div class="grid grid-cols-2">
                                     <span class="text-slate-600 font-medium">Conveyance Allowance</span>
-                                    <span class="text-right pr-4 font-bold text-slate-900" id="slipConveyance">₹0.00</span>
+                                    <span class="text-right pr-4 font-bold text-slate-900" id="slipConveyance"></span>
                                 </div>
                                 <div class="grid grid-cols-2 border-l border-slate-200">
                                     <span class="text-slate-400 pl-4 italic">-</span>
-                                    <span class="text-right font-bold text-slate-400">₹0.00</span>
+                                    <span class="text-right font-bold text-slate-400">-</span>
                                 </div>
                             </div>
                             <div class="grid grid-cols-2 py-2 px-3 bg-slate-50/50">
-                                <div class="grid grid-cols-2">
-                                    <span class="text-slate-600 font-bold text-emerald-800">Commission / Incentives</span>
-                                    <span class="text-right pr-4 font-black text-emerald-800" id="slipCommission">₹0.00</span>
+                                <div class="grid grid-cols-2 font-semibold text-emerald-900">
+                                    <span class="text-emerald-800 font-black">Commission / Incentives</span>
+                                    <span class="text-right pr-4 font-black" id="slipCommission"></span>
                                 </div>
                                 <div class="grid grid-cols-2 border-l border-slate-200">
                                     <span class="text-slate-400 pl-4 italic">-</span>
-                                    <span class="text-right font-bold text-slate-400">₹0.00</span>
+                                    <span class="text-right font-bold text-slate-400">-</span>
                                 </div>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-2 border-t border-slate-400 bg-slate-100 font-black py-2.5 px-3 text-slate-900 text-[11px] uppercase tracking-wide">
                             <div class="grid grid-cols-2">
-                                <span>Gross Total Earnings</span>
-                                <span class="text-right pr-4 text-emerald-800" id="slipGross">₹0.00</span>
+                                <span>Total Earnings</span>
+                                <span class="text-right pr-4 text-emerald-800" id="slipGross"></span>
                             </div>
                             <div class="grid grid-cols-2 border-l border-slate-300">
                                 <span class="pl-4">Total Deductions</span>
-                                <span class="text-right text-rose-800" id="slipTotalDeductions">₹0.00</span>
+                                <span class="text-right text-rose-800" id="slipTotalDeductions"></span>
                             </div>
                         </div>
                     </div>
 
                     <div class="border border-slate-900 rounded-xs p-3.5 flex flex-col sm:flex-row justify-between items-center gap-3 my-5 bg-slate-900 text-white">
                         <div class="text-center sm:text-left">
-                            <p class="text-[9px] uppercase tracking-widest text-slate-400 font-black">Net Salary Paid (In Words)</p>
-                            <p id="slipNetWords" class="text-[11px] font-bold text-slate-100 capitalize mt-0.5 tracking-tight">Zero Rupees Only</p>
+                            <p class="text-[9px] uppercase tracking-widest text-slate-400 font-black">Net Salary Pay (In Words)</p>
+                            <p id="slipNetWords" class="text-[11px] font-bold text-slate-100 capitalize mt-0.5 tracking-tight"></p>
                         </div>
                         <div class="text-center sm:text-right border-t sm:border-t-0 border-slate-700 pt-2 sm:pt-0 w-full sm:w-auto">
-                            <p class="text-[9px] uppercase tracking-widest text-emerald-400 font-black">Net Take-Home Pay</p>
-                            <p class="text-lg font-black text-emerald-400 tracking-tight mt-0.5" id="slipNet">₹0.00</p>
+                            <p class="text-[9px] uppercase tracking-widest text-emerald-400 font-black">Net Salary Pay</p>
+                            <p id="slipNet" class="text-lg font-black text-emerald-400 tracking-tight mt-0.5"></p>
                         </div>
                     </div>
                     
-                    <p class="text-center text-[9px] text-slate-400 mt-8 tracking-normal border-t border-slate-100 pt-2">
-                        This is an electronically generated statement layout processed on behalf of Novus Solutions & HR Services. Verification seals are system verified.
-                    </p>
+                    <p class="text-center text-[9px] text-slate-400 mt-10 tracking-normal border-t border-slate-100 pt-2">This file is system processed and authenticated electronically, hence manually signed seal structures are optionally verifiable via ledger architecture.</p>
                 </div>
             </div>
         </div>
@@ -347,7 +388,7 @@
             <div class="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-slate-100 pb-4 gap-4">
                 <div>
                     <h2 class="text-base font-black text-slate-900 tracking-tight">Active Employee System Database</h2>
-                    <p class="text-xs text-slate-500 font-medium">Configure target base profiles. All parameters calculate dynamically over and above deductions.</p>
+                    <p class="text-xs text-slate-500 font-medium">Add records, maintain operational pay-scales, or bulk sync registers using enterprise standard Excel files.</p>
                 </div>
                 
                 <div class="flex flex-wrap items-center gap-2">
@@ -365,8 +406,8 @@
             </div>
 
             <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider mb-3">Add / Update Base Profile Target</h3>
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 text-xs">
+                <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider mb-3">Add / Update Standalone Profile Entity</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 text-xs">
                     <div>
                         <label class="block font-bold text-slate-600 mb-1">Emp Full Name*</label>
                         <input type="text" id="dbName" placeholder="John Doe" class="w-full p-2 border border-slate-300 rounded-md bg-white">
@@ -391,9 +432,20 @@
                         <label class="block font-bold text-slate-600 mb-1">Account No.</label>
                         <input type="text" id="dbBankAcc" placeholder="55501234" class="w-full p-2 border border-slate-300 rounded-md bg-white">
                     </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs mt-3 border-t border-slate-200 pt-3">
                     <div>
-                        <label class="block font-black text-emerald-800 mb-1">Target Net Salary*</label>
-                        <input type="number" id="dbTotalSalary" placeholder="Net Base Pay" class="w-full p-2 border border-emerald-300 rounded-md bg-white font-bold">
+                        <label class="block font-bold text-emerald-800 mb-1">Base Net Salary (₹)*</label>
+                        <input type="number" id="dbNetSalary" value="0" class="w-full p-2 border border-slate-300 rounded-md bg-white font-semibold">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-rose-800 mb-1">Provident Fund PF (₹)</label>
+                        <input type="number" id="dbPf" value="0" class="w-full p-2 border border-slate-300 rounded-md bg-white">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-rose-800 mb-1">Professional Tax PT (₹)</label>
+                        <input type="number" id="dbPt" value="0" class="w-full p-2 border border-slate-300 rounded-md bg-white">
                     </div>
                 </div>
 
@@ -411,7 +463,8 @@
                             <th class="p-3">Employee Details</th>
                             <th class="p-3">Department & Title</th>
                             <th class="p-3">Banking Target</th>
-                            <th class="p-3 text-right">Target Base Net Pay (₹)</th>
+                            <th class="p-3 text-right">Target Net Pay (₹)</th>
+                            <th class="p-3 text-right">Deductions (₹)</th>
                             <th class="p-3 text-center">Data Interventions</th>
                         </tr>
                     </thead>
@@ -422,17 +475,32 @@
 
     </div>
 
+    <div id="print-footer-metadata">
+        <div class="print-flex-row">
+            <span id="print-date-time-stamp"></span>
+            <span>Page 1 of 1</span>
+        </div>
+    </div>
+
     <script>
         let companyLogoBase64 = "https://i.postimg.cc/BbQQ61GD/novuslogo.png";
-        let employeeDatabase = []; // Initialized as completely empty register sequence.
+        
+        let employeeDatabase = [
+            { name: "Rahul Sharma", id: "NS-2026-089", designation: "Senior HR Consultant", department: "Human Resources", bankName: "HDFC Bank", bankAcc: "XXXXXX12345", netSalary: 75000, pf: 1800, pt: 200 },
+            { name: "Priya Patel", id: "NS-2026-092", designation: "Lead UI Engineer", department: "Engineering", bankName: "ICICI Bank", bankAcc: "XXXXXX98765", netSalary: 95000, pf: 1800, pt: 200 },
+            { name: "Amit Verma", id: "NS-2026-105", designation: "VP Operations", department: "Management", bankName: "Axis Bank", bankAcc: "XXXXXX44321", netSalary: 140000, pf: 1800, pt: 200 }
+        ];
 
         window.addEventListener('DOMContentLoaded', () => {
-            const savedDb = localStorage.getItem('novus_emp_db_v1_08');
+            const savedDb = localStorage.getItem('novus_emp_db');
             if (savedDb) {
                 try { employeeDatabase = JSON.parse(savedDb); } catch(e) { console.error("Cache parsing corrupted."); }
             }
             
-            const minRuntimeDelay = 1500; 
+            const savedLogo = localStorage.getItem('novus_comp_logo');
+            if (savedLogo) { companyLogoBase64 = savedLogo; }
+
+            const minRuntimeDelay = 1000; 
             const timestampBegin = Date.now();
 
             window.addEventListener('load', () => {
@@ -453,6 +521,11 @@
                     renderEmployeeTable();
                 }, bufferGate);
             });
+
+            window.onbeforeprint = () => {
+                const now = new Date();
+                document.getElementById('print-date-time-stamp').innerText = "Printed On: " + now.toLocaleString();
+            };
         });
 
         function switchTab(targetTab) {
@@ -472,35 +545,52 @@
             });
         }
 
-        function handleMonthChange() {
-            const monthVal = document.getElementById('inSalaryMonth').value;
-            if (monthVal) {
-                const parts = monthVal.split('-');
-                const year = parseInt(parts[0]);
-                const month = parseInt(parts[1]);
-                const daysInMonth = new Date(year, month, 0).getDate();
+        function processLogoUpload(inputNode) {
+            if (inputNode.files && inputNode.files[0]) {
+                const targetFile = inputNode.files[0];
+                document.getElementById('upload-status-text').innerText = targetFile.name;
                 
-                document.getElementById('inMaxDays').value = daysInMonth;
-                
-                // standard baseline split allocation rules
-                const standardWOff = 4; 
-                document.getElementById('inWOffPaid').value = standardWOff;
-                document.getElementById('inPaidDays').value = daysInMonth - standardWOff;
-                document.getElementById('inLwpAbs').value = 0;
+                const readerInstance = new FileReader();
+                readerInstance.onload = function(eventResult) {
+                    companyLogoBase64 = eventResult.target.result;
+                    localStorage.setItem('novus_comp_logo', companyLogoBase64);
+                    calculateSalary();
+                };
+                readerInstance.readAsDataURL(targetFile);
             }
+        }
+
+        function resetDefaultLogo() {
+            companyLogoBase64 = "https://i.postimg.cc/BbQQ61GD/novuslogo.png";
+            localStorage.removeItem('novus_comp_logo');
+            document.getElementById('upload-status-text').innerText = "📁 Browse Local Files / Camera";
+            calculateSalary();
+        }
+
+        function getDaysInSelectedMonth() {
+            const inputMonthStr = document.getElementById('inSalaryMonth').value; 
+            if (!inputMonthStr) return 30;
+            const parts = inputMonthStr.split('-');
+            const year = parseInt(parts[0]);
+            const month = parseInt(parts[1]);
+            return new Date(year, month, 0).getDate();
+        }
+
+        function handleMonthChange() {
             calculateSalary();
         }
 
         function formatIndianCurrency(value) {
-            const num = Math.round((parseFloat(value) || 0) * 100) / 100;
+            const num = parseFloat(value) || 0;
             const absoluteSplit = num.toFixed(2).split('.');
             let wholeSegment = absoluteSplit[0];
-            const decimalSegment = '.' + absoluteSplit[1];
+            const decimalSegment = absoluteSplit[1] ? '.' + absoluteSplit[1] : '.00';
             
             const standardRegex = /(\d+)(\d{3})/;
             if (standardRegex.test(wholeSegment)) {
-                wholeSegment = wholeSegment.replace(standardRegex, '$1,$2');
+                wholeSegment = wholeSegment.replace(standardRegex, '$1' + ',' + '$2');
             }
+            
             while (standardRegex.test(wholeSegment.split(',')[0].slice(0, -1))) {
                 const segmentParts = wholeSegment.split(',');
                 const processingHeader = segmentParts.shift();
@@ -575,7 +665,7 @@
                         <p class="font-black text-slate-900 group-hover:text-blue-700">${emp.name}</p>
                         <p class="text-[10px] text-slate-500">${emp.designation} • ${emp.department}</p>
                     </div>
-                    <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-sm font-mono text-slate-600 font-bold">₹${emp.totalSalary} Net</span>
+                    <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-sm font-mono text-slate-600 font-bold">${emp.id}</span>
                 </div>
             `).join('');
             
@@ -587,10 +677,11 @@
             document.getElementById('inEmpId').value = employeeObject.id;
             document.getElementById('inDesignation').value = employeeObject.designation;
             document.getElementById('inDepartment').value = employeeObject.department;
-            document.getElementById('inBankName').value = employeeObject.bankName;
-            document.getElementById('inBankAcc').value = employeeObject.bankAcc;
-            document.getElementById('inTotalNet').value = employeeObject.totalSalary;
-            document.getElementById('inCommission').value = "";
+            document.getElementById('inBankName').value = employeeObject.bankName || '';
+            document.getElementById('inBankAcc').value = employeeObject.bankAcc || '';
+            document.getElementById('inNetSalary').value = employeeObject.netSalary || 0;
+            document.getElementById('inPf').value = employeeObject.pf || 0;
+            document.getElementById('inPt').value = employeeObject.pt || 0;
 
             document.getElementById('searchDropdown').classList.add('hidden');
             calculateSalary();
@@ -603,96 +694,82 @@
         });
 
         function calculateSalary() {
-            const baseNetTargetInput = parseFloat(document.getElementById('inTotalNet').value) || 0;
-            const commission = parseFloat(document.getElementById('inCommission').value) || 0;
-            const maxDays = parseFloat(document.getElementById('inMaxDays').value) || 30;
+            const totalMonthDays = getDaysInSelectedMonth();
             
-            const paidDays = parseFloat(document.getElementById('inPaidDays').value) || 0;
-            const wOffPaid = parseFloat(document.getElementById('inWOffPaid').value) || 0;
+            const woffPaid = parseFloat(document.getElementById('inWoffPaid').value) || 0;
             const lwpAbs = parseFloat(document.getElementById('inLwpAbs').value) || 0;
-
-            // Attendance proration adjustment mechanics
-            const functionalPaidDays = paidDays + wOffPaid;
-            const attendanceMultiplier = maxDays > 0 ? (functionalPaidDays / maxDays) : 0;
             
-            // Apply proration profile logic directly onto base Net Target
-            const effectiveNetScale = baseNetTargetInput * attendanceMultiplier;
-
-            // Over & Above dynamic calculation logic derivation:
-            // Net = Gross - Deductions
-            // Deductions = PF + PT -> Where PF = 12% of Basic, and Basic = 50% of Gross -> PF = 0.06 * Gross
-            // Net = Gross - (0.06 * Gross + PT) -> Net = 0.94 * Gross - PT -> Gross = (Net + PT) / 0.94
-            const ptAssessmentThreshold = effectiveNetScale > 10000 ? 200 : 0;
+            const computedPaidDays = Math.max(0, totalMonthDays - lwpAbs - woffPaid);
             
-            let computedGrossEarningsBase = 0;
-            if (effectiveNetScale > 0) {
-                computedGrossEarningsBase = (effectiveNetScale + ptAssessmentThreshold) / 0.94;
+            const baseNetInHandInput = parseFloat(document.getElementById('inNetSalary').value) || 0;
+            const commission = parseFloat(document.getElementById('inCommission').value) || 0;
+            
+            const activeEarningDays = totalMonthDays - lwpAbs;
+            let proratedNetSalary = baseNetInHandInput;
+            if (totalMonthDays > 0) {
+                proratedNetSalary = (baseNetInHandInput * activeEarningDays) / totalMonthDays;
             }
 
-            // Derive individual standard ratio distributions from structural gross allocation base
-            let basic = computedGrossEarningsBase * 0.50;
-            let pf = basic * 0.12;
-            
-            // Enforce maximum cap standard rule if required, recalculating dependencies perfectly
-            if (pf > 1800) {
-                pf = 1800;
-                computedGrossEarningsBase = effectiveNetScale + pf + ptAssessmentThreshold;
-                basic = computedGrossEarningsBase * 0.50;
-            }
+            const finalNetDisbursement = Math.max(0, proratedNetSalary + commission);
 
-            const hra = computedGrossEarningsBase * 0.30;
-            const conveyance = Math.max(0, computedGrossEarningsBase - (basic + hra));
+            const pf = parseFloat(document.getElementById('inPf').value) || 0;
+            const pt = parseFloat(document.getElementById('inPt').value) || 0;
+            const totalDeductions = pf + pt;
 
-            const totalEarnings = computedGrossEarningsBase + commission;
-            const totalDeductions = pf + ptAssessmentThreshold;
-            const absoluteNetDisbursed = Math.max(0, totalEarnings - totalDeductions);
+            const targetGrossCalculated = finalNetDisbursement + totalDeductions;
 
-            // Document View Bindings
-            document.getElementById('slipBasic').innerText = formatIndianCurrency(basic);
-            document.getElementById('slipHra').innerText = formatIndianCurrency(hra);
-            document.getElementById('slipConveyance').innerText = formatIndianCurrency(conveyance);
+            const basicSplit = targetGrossCalculated * 0.50;
+            const hraSplit = targetGrossCalculated * 0.30;
+            const conveyanceSplit = Math.max(0, targetGrossCalculated - (basicSplit + hraSplit + totalDeductions));
+
+            document.getElementById('slipBasic').innerText = formatIndianCurrency(basicSplit);
+            document.getElementById('slipHra').innerText = formatIndianCurrency(hraSplit);
+            document.getElementById('slipConveyance').innerText = formatIndianCurrency(conveyanceSplit);
             document.getElementById('slipCommission').innerText = commission > 0 ? formatIndianCurrency(commission) : "₹0.00";
             
             document.getElementById('slipPf').innerText = formatIndianCurrency(pf);
-            document.getElementById('slipPt').innerText = formatIndianCurrency(ptAssessmentThreshold);
+            document.getElementById('slipPt').innerText = formatIndianCurrency(pt);
 
-            document.getElementById('slipGross').innerText = formatIndianCurrency(totalEarnings);
+            document.getElementById('slipGross').innerText = formatIndianCurrency(targetGrossCalculated);
             document.getElementById('slipTotalDeductions').innerText = formatIndianCurrency(totalDeductions);
-            document.getElementById('slipNet').innerText = formatIndianCurrency(absoluteNetDisbursed);
-            document.getElementById('slipNetWords').innerText = convertNumberToIndianWords(absoluteNetDisbursed);
+            document.getElementById('slipNet').innerText = formatIndianCurrency(finalNetDisbursement);
+            document.getElementById('slipNetWords').innerText = convertNumberToIndianWords(finalNetDisbursement);
 
-            document.getElementById('slipCompanyName').innerText = document.getElementById('inCompanyName').value || "Novus Solutions & HR Services";
-            document.getElementById('slipCompanyAddress').innerText = document.getElementById('inCompanyAddress').value || "";
+            document.getElementById('slipLogo').src = companyLogoBase64;
+            document.getElementById('slipCompanyName').innerText = document.getElementById('inCompanyName').value;
+            document.getElementById('slipCompanyAddress').innerText = document.getElementById('inCompanyAddress').value;
 
-            document.getElementById('slipEmpName').innerText = document.getElementById('inEmpName').value || "-";
-            document.getElementById('slipEmpId').innerText = document.getElementById('inEmpId').value || "-";
-            document.getElementById('slipDesignation').innerText = document.getElementById('inDesignation').value || "-";
-            document.getElementById('slipDepartment').innerText = document.getElementById('inDepartment').value || "-";
-            document.getElementById('slipBankName').innerText = document.getElementById('inBankName').value || "-";
-            document.getElementById('slipBankAcc').innerText = document.getElementById('inBankAcc').value || "-";
+            document.getElementById('slipEmpName').innerText = document.getElementById('inEmpName').value;
+            document.getElementById('slipEmpId').innerText = document.getElementById('inEmpId').value;
+            document.getElementById('slipDesignation').innerText = document.getElementById('inDesignation').value;
+            document.getElementById('slipDepartment').innerText = document.getElementById('inDepartment').value;
+            document.getElementById('slipBankName').innerText = document.getElementById('inBankName').value || 'N/A';
+            document.getElementById('slipBankAcc').innerText = document.getElementById('inBankAcc').value || 'N/A';
             
-            document.getElementById('slipPaidDays').innerText = paidDays;
-            document.getElementById('slipWOffPaid').innerText = wOffPaid;
-            document.getElementById('slipLwpAbs').innerText = lwpAbs;
+            document.getElementById('slipWoffPaidDisplay').innerText = document.getElementById('inWoffPaid').value || '0';
+            document.getElementById('slipLwpAbsDisplay').innerText = document.getElementById('inLwpAbs').value || '0';
+            document.getElementById('slipPaidDays').innerText = computedPaidDays;
 
-            const inputDateString = document.getElementById('inSalaryMonth').value;
+            const inputDateString = document.getElementById('inSalaryMonth').value; 
             if(inputDateString) {
                 const parts = inputDateString.split('-');
                 const trackingDate = new Date(parts[0], parts[1] - 1, 1);
-                document.getElementById('slipMonth').innerText = trackingDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+                const stringMonthYear = trackingDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+                document.getElementById('slipHeaderMonthYear').innerText = stringMonthYear;
             } else {
-                document.getElementById('slipMonth').innerText = "-";
+                document.getElementById('slipHeaderMonthYear').innerText = "";
             }
         }
 
         function renderEmployeeTable() {
             const container = document.getElementById('employeeTableBody');
             if(employeeDatabase.length === 0) {
-                container.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-xs text-slate-400 font-medium italic">Database register empty. Insert records or upload template file.</td></tr>`;
+                container.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-xs text-slate-400 font-medium italic">Database register empty. Insert records or upload template file.</td></tr>`;
                 return;
             }
 
             container.innerHTML = employeeDatabase.map((emp, index) => {
+                const deductions = (emp.pf || 0) + (emp.pt || 0);
                 return `
                     <tr class="hover:bg-slate-50 transition divide-x divide-slate-100">
                         <td class="p-3">
@@ -707,7 +784,8 @@
                             <p class="font-medium">${emp.bankName || 'N/A'}</p>
                             <p class="text-[10px] font-mono text-slate-400">${emp.bankAcc || 'N/A'}</p>
                         </td>
-                        <td class="p-3 text-right font-bold text-emerald-700">${formatIndianCurrency(emp.totalSalary)}</td>
+                        <td class="p-3 text-right font-bold text-emerald-700">${formatIndianCurrency(emp.netSalary)}</td>
+                        <td class="p-3 text-right font-bold text-rose-700">${formatIndianCurrency(deductions)}</td>
                         <td class="p-3 text-center space-x-1">
                             <button onclick='loadToWorkspace(${JSON.stringify(emp).replace(/"/g, '&quot;')})' class="bg-blue-50 text-blue-700 hover:bg-blue-100 text-[10px] font-black px-2 py-1 rounded-md transition cursor-pointer uppercase">Load</button>
                             <button onclick="deleteEmployeeRecord(${index})" class="bg-rose-50 text-rose-700 hover:bg-rose-100 text-[10px] font-black px-2 py-1 rounded-md transition cursor-pointer uppercase">Delete</button>
@@ -722,10 +800,10 @@
             const id = document.getElementById('dbId').value.trim();
             const designation = document.getElementById('dbDesignation').value.trim();
             const department = document.getElementById('dbDepartment').value.trim();
-            const totalSalary = parseFloat(document.getElementById('dbTotalSalary').value) || 0;
+            const netSalary = parseFloat(document.getElementById('dbNetSalary').value) || 0;
 
-            if(!name || !id || !designation || !department || totalSalary <= 0) {
-                alert("All fields including a valid Target Net Salary must be provided.");
+            if(!name || !id || !designation || !department || netSalary <= 0) {
+                alert("Mandatory structural fields (*) must be provided before serialization.");
                 return;
             }
 
@@ -736,7 +814,9 @@
                 department: department,
                 bankName: document.getElementById('dbBankName').value.trim(),
                 bankAcc: document.getElementById('dbBankAcc').value.trim(),
-                totalSalary: totalSalary
+                netSalary: netSalary,
+                pf: parseFloat(document.getElementById('dbPf').value) || 0,
+                pt: parseFloat(document.getElementById('dbPt').value) || 0
             };
 
             const targetIndex = employeeDatabase.findIndex(emp => emp.id.toLowerCase() === id.toLowerCase());
@@ -749,8 +829,10 @@
             saveDatabaseState();
             renderEmployeeTable();
             
-            ['dbName', 'dbId', 'dbDesignation', 'dbDepartment', 'dbBankName', 'dbBankAcc', 'dbTotalSalary'].forEach(id => document.getElementById(id).value = "");
-            alert(`Employee Record associated with ID "${id}" saved into ledger successfully!`);
+            ['dbName', 'dbId', 'dbDesignation', 'dbDepartment', 'dbBankName', 'dbBankAcc'].forEach(id => document.getElementById(id).value = "");
+            ['dbNetSalary', 'dbPf', 'dbPt'].forEach(id => document.getElementById(id).value = "0");
+            
+            alert(`Employee Record associated with ID "${id}" saved successfully!`);
         }
 
         function loadToWorkspace(employeeObject) {
@@ -759,7 +841,7 @@
         }
 
         function deleteEmployeeRecord(index) {
-            if(confirm("Confirm profile deletion?")) {
+            if(confirm("Confirm irrevocable deletion sequence for selected profile identifier?")) {
                 employeeDatabase.splice(index, 1);
                 saveDatabaseState();
                 renderEmployeeTable();
@@ -767,7 +849,7 @@
         }
 
         function clearAllEmployees() {
-            if(confirm("DANGER! Purge complete local employee datastore records?")) {
+            if(confirm("DANGER! This action will completely purge all personnel. Proceed anyway?")) {
                 employeeDatabase = [];
                 saveDatabaseState();
                 renderEmployeeTable();
@@ -775,18 +857,18 @@
         }
 
         function saveDatabaseState() {
-            localStorage.setItem('novus_emp_db_v1_08', JSON.stringify(employeeDatabase));
+            localStorage.setItem('novus_emp_db', JSON.stringify(employeeDatabase));
         }
 
         function exportToExcel() {
             if(employeeDatabase.length === 0) {
-                alert("No active data rows inside register matrix.");
+                alert("No active rows found inside ledger arrays to write file.");
                 return;
             }
             const standardSheet = XLSX.utils.json_to_sheet(employeeDatabase);
             const workbookInstance = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbookInstance, standardSheet, "Net Salary System Matrix");
-            XLSX.writeFile(workbookInstance, `Novus_Database_v1.08.xlsx`);
+            XLSX.utils.book_append_sheet(workbookInstance, standardSheet, "Corporate Ledger Registry");
+            XLSX.writeFile(workbookInstance, `Novus_Employee_Master_Database_${new Date().getFullYear()}.xlsx`);
         }
 
         function importFromExcel(inputNode) {
@@ -802,7 +884,7 @@
                 const extractedRows = XLSX.utils.sheet_to_json(loadedWorkbook.Sheets[parsingTargetSheetName]);
                 
                 if(extractedRows.length === 0) {
-                    alert("Verification processing failed. Empty rows inside file structure.");
+                    alert("Sheet verification failed. Missing rows.");
                     return;
                 }
 
@@ -813,11 +895,13 @@
                     department: String(row.department || row.Department || '').trim(),
                     bankName: String(row.bankName || row.BankName || '').trim(),
                     bankAcc: String(row.bankAcc || row.BankAccount || row.AccountNo || '').trim(),
-                    totalSalary: parseFloat(row.totalSalary || row.TotalSalary || row.Salary || row.NetSalary || row.NetPay || 0)
-                })).filter(item => item.name && item.id && item.totalSalary > 0);
+                    netSalary: parseFloat(row.netSalary || row.NetSalary || row.NetPay || 0),
+                    pf: parseFloat(row.pf || row.Pf || row.PF || 0),
+                    pt: parseFloat(row.pt || row.Pt || row.PT || 0)
+                })).filter(item => item.name && item.id);
 
                 if(structuredImports.length === 0) {
-                    alert("Import verification failed. Check column name properties ('name', 'id', 'totalSalary').");
+                    alert("Import validation aborting. Ensure headers map accurately.");
                     return;
                 }
 
@@ -833,7 +917,7 @@
                 saveDatabaseState();
                 renderEmployeeTable();
                 inputNode.value = "";
-                alert(`Successfully synchronized ${structuredImports.length} employee profile matrices!`);
+                alert(`Successfully merged and synchronized ${structuredImports.length} employee profiles!`);
             };
             
             standardReader.readAsArrayBuffer(readingTarget);
