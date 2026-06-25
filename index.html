@@ -485,11 +485,7 @@
     <script>
         let companyLogoBase64 = "https://i.postimg.cc/BbQQ61GD/novuslogo.png";
         
-        let employeeDatabase = [
-            { name: "", id: "", designation: "", department: "", bankName: "", bankAcc: "", netSalary: 75000, pf: 1800, pt: 200 },
-            { name: "Priya Patel", id: "NS-2026-092", designation: "Lead UI Engineer", department: "Engineering", bankName: "ICICI Bank", bankAcc: "XXXXXX98765", netSalary: 95000, pf: 1800, pt: 200 },
-            { name: "Amit Verma", id: "NS-2026-105", designation: "VP Operations", department: "Management", bankName: "Axis Bank", bankAcc: "XXXXXX44321", netSalary: 140000, pf: 1800, pt: 200 }
-        ];
+        let employeeDatabase = [];
 
         window.addEventListener('DOMContentLoaded', () => {
             const savedDb = localStorage.getItem('novus_emp_db');
