@@ -928,58 +928,95 @@ window.onafterprint = () => {
             XLSX.writeFile(workbookInstance, `Novus_Employee_Master_Database_${new Date().getFullYear()}.xlsx`);
         }
 
-        function importFromExcel(inputNode) {
-            if (!inputNode.files || !inputNode.files[0]) return;
-            
-            const readingTarget = inputNode.files[0];
-            const standardReader = new FileReader();
-            
-            standardReader.onload = function(e) {
-                const dataBuffer = new Uint8Array(e.target.result);
-                const loadedWorkbook = XLSX.read(dataBuffer, {type: 'array'});
-                const parsingTargetSheetName = loadedWorkbook.SheetNames[0];
-                const extractedRows = XLSX.utils.sheet_to_json(loadedWorkbook.Sheets[parsingTargetSheetName]);
-                
-                if(extractedRows.length === 0) {
-                    alert("Sheet verification failed. Missing rows.");
-                    return;
-                }
-
-                const structuredImports = extractedRows.map(row => ({
-                    name: String(row.name || row.Name || row.EmployeeName || '').trim(),
-                    id: String(row.id || row.Id || row.EmployeeID || row.EmpID || '').trim(),
-                    designation: String(row.designation || row.Designation || '').trim(),
-                    department: String(row.department || row.Department || '').trim(),
-                    bankName: String(row.bankName || row.BankName || '').trim(),
-                    bankAcc: String(row.bankAcc || row.BankAccount || row.AccountNo || '').trim(),
-                    netSalary: parseFloat(row.netSalary || row.NetSalary || row.NetPay || 0),
-                    pf: parseFloat(row.pf || row.Pf || row.PF || 0),
-                    pt: parseFloat(row.pt || row.Pt || row.PT || 0),
-                    joiningDate: String(row.joiningDate || row.JoiningDate || '').trim()
-                })).filter(item => item.name && item.id);
-
-                if(structuredImports.length === 0) {
-                    alert("Import validation aborting. Ensure headers map accurately.");
-                    return;
-                }
-
-                structuredImports.forEach(newItem => {
-                    const index = employeeDatabase.findIndex(existingItem => existingItem.id.toLowerCase() === newItem.id.toLowerCase());
-                    if(index > -1) {
-                        employeeDatabase[index] = newItem;
-                    } else {
-                        employeeDatabase.push(newItem);
-                    }
-                });
-
-                saveDatabaseState();
-                renderEmployeeTable();
-                inputNode.value = "";
-                alert(`Successfully merged and synchronized ${structuredImports.length} employee profiles!`);
-            };
-            
-            standardReader.readAsArrayBuffer(readingTarget);
+function importFromExcel(inputNode) {
+    if (!inputNode.files || !inputNode.files[0]) return;
+    
+    const readingTarget = inputNode.files[0];
+    const standardReader = new FileReader();
+    
+    standardReader.onload = function(e) {
+        const dataBuffer = new Uint8Array(e.target.result);
+        // Added cellDates: true so Excel library turns serial dates into real JavaScript dates
+        const loadedWorkbook = XLSX.read(dataBuffer, {type: 'array', cellDates: true});
+        const parsingTargetSheetName = loadedWorkbook.SheetNames[0];
+        const extractedRows = XLSX.utils.sheet_to_json(loadedWorkbook.Sheets[parsingTargetSheetName]);
+        
+        if(extractedRows.length === 0) {
+            alert("Sheet verification failed. Missing rows.");
+            return;
         }
-    </script>
+
+        const structuredImports = extractedRows.map(row => {
+            // --- DATE PROCESSING ENGINE ---
+            let rawDate = row.joiningDate || row.JoiningDate || row["Joining Date"] || '';
+            let formattedDateStr = '';
+
+            if (rawDate) {
+                if (rawDate instanceof Date && !isNaN(rawDate)) {
+                    // It's a real JavaScript Date object -> convert to YYYY-MM-DD
+                    const yyyy = rawDate.getFullYear();
+                    const mm = String(rawDate.getMonth() + 1).padStart(2, '0');
+                    const dd = String(rawDate.getDate()).padStart(2, '0');
+                    formattedDateStr = `${yyyy}-${mm}-${dd}`;
+                } else {
+                    // It's a string text (like DD/MM/YYYY or DD-MM-YYYY)
+                    let cleanStr = String(rawDate).trim();
+                    let dateParts = cleanStr.split(/[-/]/); // splits by / or -
+                    
+                    if (dateParts.length === 3) {
+                        // Check if it's DD/MM/YYYY format
+                        if (dateParts[2].length === 4) {
+                            let day = dateParts[0].padStart(2, '0');
+                            let month = dateParts[1].padStart(2, '0');
+                            let year = dateParts[2];
+                            formattedDateStr = `${year}-${month}-${day}`;
+                        } 
+                        // Check if it's YYYY/MM/DD format
+                        else if (dateParts[0].length === 4) {
+                            let year = dateParts[0];
+                            let month = dateParts[1].padStart(2, '0');
+                            let day = dateParts[2].padStart(2, '0');
+                            formattedDateStr = `${year}-${month}-${day}`;
+                        }
+                    }
+                }
+            }
+
+            return {
+                name: String(row.name || row.Name || row.EmployeeName || row["Employee Name"] || '').trim(),
+                id: String(row.id || row.Id || row.EmployeeID || row.EmpID || row["Employee ID"] || '').trim(),
+                designation: String(row.designation || row.Designation || row["Designation"] || '').trim(),
+                department: String(row.department || row.Department || row["Department"] || '').trim(),
+                bankName: String(row.bankName || row.BankName || row["Bank Name"] || '').trim(),
+                bankAcc: String(row.bankAcc || row.BankAccount || row.AccountNo || row["Bank Account"] || '').trim(),
+                netSalary: parseFloat(row.netSalary || row.NetSalary || row.NetPay || row["Net Salary"] || 0),
+                pf: parseFloat(row.pf || row.Pf || row.PF || row["PF"] || 0),
+                pt: parseFloat(row.pt || row.Pt || row.PT || row["PT"] || 0),
+                joiningDate: formattedDateStr // <-- Saves clean YYYY-MM-DD back to database!
+            };
+        }).filter(item => item.name && item.id);
+
+        if(structuredImports.length === 0) {
+            alert("Import validation aborting. Ensure headers map accurately.");
+            return;
+        }
+
+        structuredImports.forEach(newItem => {
+            const index = employeeDatabase.findIndex(existingItem => existingItem.id.toLowerCase() === newItem.id.toLowerCase());
+            if(index > -1) {
+                employeeDatabase[index] = newItem;
+            } else {
+                employeeDatabase.push(newItem);
+            }
+        });
+
+        saveDatabaseState();
+        renderEmployeeTable();
+        inputNode.value = "";
+        alert(`Successfully merged and synchronized ${structuredImports.length} employee profiles!`);
+    };
+    
+    standardReader.readAsArrayBuffer(readingTarget);
+}    </script>
 </body>
 </html>
